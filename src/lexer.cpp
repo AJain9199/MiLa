@@ -80,7 +80,7 @@ std::string Lexer::id() const {
     return current_token_;
 }
 
-long long Lexer::num() const {
+NUM_TYPE Lexer::num() const {
     return stoll(current_token_);
 }
 

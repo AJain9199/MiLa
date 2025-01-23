@@ -5,6 +5,7 @@
 #include <iostream>
 
 #define LEX 1
+#define PARSE 2
 
 void err(std::string msg, int code) {
     std::cerr << msg;

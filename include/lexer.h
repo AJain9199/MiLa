@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <set>
 
+#define NUM_TYPE long long
+
 class Lexer {
 public:
     enum TokenType {
@@ -16,16 +18,16 @@ public:
     explicit Lexer(const std::string& filename);
     TokenType getToken();
     std::string id() const;
-    long long num() const;
+    NUM_TYPE num() const;
     char punc() const;
 
 private:
     std::ifstream input_file_;
     std::string current_token_;
     char current_char_{};
+    void skipWs();
     Lexer *subfile{nullptr};
 
-    void skipWs();
 
     const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ',', ';', '<', '>', '=', '.'};
 };
