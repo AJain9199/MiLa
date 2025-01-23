@@ -17,7 +17,7 @@ void Parser::parseAssignmentDecl() {
 
     eat('=');
 
-    if (lexer.getToken() == Lexer::PUNCTUATION) {
+    if (lexer == Lexer::PUNCTUATION) {
         if (lexer.punc() != '[') {
             perr(format("Expected numeric literal, macro, or expansion list. Found '{}' instead.", lexer.punc()));
         }
@@ -27,12 +27,12 @@ void Parser::parseAssignmentDecl() {
         }
 
         num_list val = parseNumList();
-        eat(';');
 
         expansion_list_symtab[depth][name] = val;
     } else {
         macro_symtab[depth][name] = parseExpr(bit_def);
     }
+    eat(';');
 }
 
 void Parser::parseCtrlWordDecl() {
@@ -67,15 +67,16 @@ void Parser::parseCtrlWordDecl() {
 
 NUM_TYPE Parser::parseExpr(bool bit_def) {
     NUM_TYPE val;
-    enum Lexer::TokenType t = lexer.getToken();
-    if (t == Lexer::NUMERIC_LITERAL) {
+    if (lexer.current_token() == Lexer::NUMERIC_LITERAL) {
         val = lexer.num();
-    } else if (t == Lexer::IDENTIFIER) {
+        lexer.getToken();
+    } else if (lexer.current_token() == Lexer::IDENTIFIER) {
         val = resolve_macro(lexer.id());
-    } else{
+        lexer.getToken();
+    } else {
         perr("Unexpected lvalue for assignment.");
     }
-    return (bit_def?1<<val:val);
+    return (bit_def ? 1 << val : val);
 }
 
 Parser::Parser(const std::string &filename) : lexer(filename) {
@@ -155,9 +156,14 @@ NUM_TYPE Parser::eat_num() {
 
 void Parser::parseCode() {
     init_var_depth(0);
-    while (lexer.getToken() != Lexer::END) {
+    lexer.getToken();
+    while (lexer.current_token() != Lexer::END) {
         if (lexer == Lexer::CTRL) {
             parseCtrlWordDecl();
+        } else if (lexer == '(') {
+            parseContextBlock();
+        } else {
+            parseAssignmentDecl();
         }
     }
 }
@@ -177,18 +183,31 @@ void Parser::init_var_depth(int d) {
         context[d] = {};
     }
     context.emplace_back();
+
+    if (statement_tab.size() > d) {
+        statement_tab[d] = {};
+    }
+    statement_tab.emplace_back();
 }
 
 void Parser::parseContextBlock() {
     depth++;
+    init_var_depth(depth);
     parseContextList();
-
     eat('{');
-
+    while (lexer != '}') {
+        if (lexer == '(') {
+            parseContextBlock();
+        } else {
+            statement_tab[depth].push_back(parseStmt());
+        }
+    }
+    statement_tab[depth] = parseStmtList();
 }
 
 void Parser::parseContextList() {
     while (lexer == '(') {
+        eat('(');
         context[depth].push_back(parseContextExpr());
         eat(')');
     }
@@ -199,10 +218,54 @@ context_expr Parser::parseContextExpr() {
         string name = eat_id();
 
         eat(':');
-        int idx = eat_num();
+        NUM_TYPE idx = eat_num();
         eat('%');
         return {true, make_shared<expansion_list_param>(name, idx), 0};
     } else {
         return {false, nullptr, parseExpr()};
     }
+}
+
+statement_list Parser::parseStmtList() {
+    statement_list stmt_list;
+
+    eat('{');
+    while (lexer != '}') {
+        stmt_list.push_back(parseStmt());
+    }
+    eat('}');
+    return stmt_list;
+}
+
+statement Parser::parseStmt() {
+    statement stmt;
+    stmt.first = 0;
+    while (lexer != ';') {
+        NUM_TYPE val;
+        if (lexer.current_token() == Lexer::IDENTIFIER) {
+            string name = eat_id();
+
+            if (lexer == '=') {
+                if (bitset_tab.find(name) == bitset_tab.end()) {
+                    perr(format("No bitset declaration found for {}", name));
+                }
+
+                eat('=');
+                context_expr ex = parseContextExpr();
+                stmt.second.emplace_back(name, ex);
+            } else {
+                stmt.first |= resolve_macro(name);
+            }
+        } else {
+            stmt.first |= parseExpr();
+        }
+
+        if (lexer == ',') {
+            eat(',');
+        } else {
+            eat(';');
+            break;
+        }
+    }
+    return stmt;
 }

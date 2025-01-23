@@ -24,6 +24,8 @@ typedef struct {
     std::shared_ptr<expansion_list_param> exp_param;
     NUM_TYPE num_literal;
 } context_expr;
+typedef std::pair<NUM_TYPE, std::vector<std::pair<std::string, context_expr>>> statement;
+typedef std::vector<statement> statement_list;
 
 class Parser {
 public:
@@ -31,6 +33,8 @@ public:
     void parseCode();
     void parseAssignmentDecl();
     void parseContextBlock();
+    statement_list parseStmtList();
+    statement parseStmt();
     void parseContextList();
     void parseCtrlWordDecl();
     NUM_TYPE parseExpr(bool bit_def=false);
@@ -42,6 +46,7 @@ private:
     std::vector<expansion_list_tab> expansion_list_symtab{};
     std::vector<macro_tab> macro_symtab{};
     std::map<std::string, std::pair<int, int>> bitset_tab{};
+    std::vector<statement_list> statement_tab;
 
     Lexer lexer;
 
@@ -50,6 +55,7 @@ private:
     num_list parseNumList();
 
     NUM_TYPE resolve_macro(const std::string &);
+    std::pair<int, int> resolve_bitset(const std::string &);
 
     void eat(char);
     std::string eat_id();
