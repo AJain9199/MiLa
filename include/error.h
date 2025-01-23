@@ -9,4 +9,4 @@
 
 void err(std::string msg, int code);
 
-#endif //MILA_ERROR_H
+#endif // MILA_ERROR_H

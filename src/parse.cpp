@@ -166,13 +166,43 @@ void Parser::init_var_depth(int d) {
     if (macro_symtab.size() > d) {
         macro_symtab[d] = {};
     }
-    macro_symtab.push_back({});
+    macro_symtab.emplace_back();
 
     if (expansion_list_symtab.size() > d) {
         expansion_list_symtab[d] = {};
     }
     expansion_list_symtab.emplace_back();
+
+    if (context.size() > d) {
+        context[d] = {};
+    }
+    context.emplace_back();
 }
 
+void Parser::parseContextBlock() {
+    depth++;
+    parseContextList();
 
+    eat('{');
 
+}
+
+void Parser::parseContextList() {
+    while (lexer == '(') {
+        context[depth].push_back(parseContextExpr());
+        eat(')');
+    }
+}
+
+context_expr Parser::parseContextExpr() {
+    if (lexer == '%') {
+        string name = eat_id();
+
+        eat(':');
+        int idx = eat_num();
+        eat('%');
+        return {true, make_shared<expansion_list_param>(name, idx), 0};
+    } else {
+        return {false, nullptr, parseExpr()};
+    }
+}

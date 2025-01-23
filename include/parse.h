@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <lexer.h>
+#include <memory>
 
 typedef long long ll;
 
@@ -20,17 +21,20 @@ typedef struct {
 
 typedef struct {
     bool param;
-    expansion_list_param *exp_param;
+    std::shared_ptr<expansion_list_param> exp_param;
     NUM_TYPE num_literal;
-} context_block;
+} context_expr;
 
 class Parser {
 public:
     explicit Parser(const std::string &);
     void parseCode();
     void parseAssignmentDecl();
+    void parseContextBlock();
+    void parseContextList();
     void parseCtrlWordDecl();
     NUM_TYPE parseExpr(bool bit_def=false);
+    context_expr parseContextExpr();
 
 
 private:
@@ -41,7 +45,7 @@ private:
 
     Lexer lexer;
 
-    std::vector<context_block> context;
+    std::vector<std::vector<context_expr>> context;
 
     num_list parseNumList();
 
