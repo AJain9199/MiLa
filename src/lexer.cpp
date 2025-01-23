@@ -93,3 +93,7 @@ void Lexer::skipWs() {
         current_char_ = input_file_.get();
     }
 }
+
+bool Lexer::operator==(char c) {
+    return getToken() == PUNCTUATION && current_char_ == c;
+}

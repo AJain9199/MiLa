@@ -21,6 +21,8 @@ public:
     NUM_TYPE num() const;
     char punc() const;
 
+    bool operator==(char c);
+
 private:
     std::ifstream input_file_;
     std::string current_token_;
