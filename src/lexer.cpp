@@ -13,7 +13,7 @@ Lexer::TokenType Lexer::getToken() {
     if (subfile != nullptr) {
         enum TokenType e;
         if ((e = subfile->getToken()) != END) {
-            return e;
+            return token = e;
         } else {
             delete subfile;
             subfile = nullptr;
@@ -26,7 +26,7 @@ Lexer::TokenType Lexer::getToken() {
     skipWs();
 
     if (!input_file_.good()) {
-        return END;
+        return token = END;
     }
 
     // identifier
@@ -57,9 +57,9 @@ Lexer::TokenType Lexer::getToken() {
         }
 
         if (keywords.find(current_token_) != keywords.end()) {
-            return KEYWORD;
+            return token = KEYWORD;
         }
-        return IDENTIFIER;
+        return token = IDENTIFIER;
     }
 
     // numeric literal
@@ -69,15 +69,15 @@ Lexer::TokenType Lexer::getToken() {
             current_char_ = input_file_.get();
         }
         input_file_.unget();
-        return NUMERIC_LITERAL;
+        return token = NUMERIC_LITERAL;
     }
 
     if (punctuation.find(current_char_) != punctuation.end()) {
-        return PUNCTUATION;
+        return token = PUNCTUATION;
     }
 
     err("Unknown character", 1);
-    return END;
+    return token = END;
 }
 
 std::string Lexer::id() const {
@@ -99,9 +99,17 @@ void Lexer::skipWs() {
 }
 
 bool Lexer::operator==(char c) {
-    return getToken() == PUNCTUATION && current_char_ == c;
+    return token == PUNCTUATION && current_char_ == c;
 }
 
 Lexer::Keyword Lexer::key() const {
     return keywords.at(current_token_);
+}
+
+Lexer::TokenType Lexer::current_token() const {
+    return token;
+}
+
+bool Lexer::operator==(Lexer::Keyword k) {
+    return token == KEYWORD && key() == k;
 }

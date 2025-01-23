@@ -26,7 +26,8 @@ typedef struct {
 
 class Parser {
 public:
-    explicit Parser(std::string&);
+    explicit Parser(const std::string &);
+    void parseCode();
     void parseAssignmentDecl();
     void parseCtrlWordDecl();
     NUM_TYPE parseExpr(bool bit_def=false);
@@ -34,9 +35,9 @@ public:
 
 private:
     int depth = 0;
-    std::vector<expansion_list_tab> expansion_list_symtab;
-    std::vector<macro_tab> macro_symtab;
-    std::map<std::string, std::pair<int, int>> bitset_tab;
+    std::vector<expansion_list_tab> expansion_list_symtab{};
+    std::vector<macro_tab> macro_symtab{};
+    std::map<std::string, std::pair<int, int>> bitset_tab{};
 
     Lexer lexer;
 
@@ -51,6 +52,8 @@ private:
     void eat(Lexer::TokenType);
     void eat(Lexer::Keyword);
     NUM_TYPE eat_num();
+
+    void init_var_depth(int d);
 };
 
 #endif //MILA_PARSER_H

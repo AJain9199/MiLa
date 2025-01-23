@@ -5,4 +5,4 @@ set(CMAKE_CXX_STANDARD 20)
 
 include_directories(include)
 
-add_executable(MiLa src/lexer.cpp src/parse.cpp main.cpp)
+add_executable(MiLa src/lexer.cpp src/parse.cpp src/error.cpp main.cpp)

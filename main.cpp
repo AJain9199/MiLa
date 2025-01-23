@@ -1,14 +1,13 @@
 #include <iostream>
 #include <lexer.h>
+#include <parse.h>
 
 using namespace std;
 
 int main() {
-    Lexer lex("tst.micro");
+    Parser parse( "tst.micro");
 
-    Lexer::TokenType e;
-    while ((e = lex.getToken()) != Lexer::END) {
-        cout << e << '\n';
-    }
+    parse.parseCode();
+
     return 0;
 }

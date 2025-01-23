@@ -1,3 +1,6 @@
+#ifndef MILA_LEXER_H
+#define MILA_LEXER_H
+
 #include <fstream>
 #include <string>
 #include <cctype>
@@ -27,16 +30,21 @@ public:
     NUM_TYPE num() const;
     enum Keyword key() const;
     char punc() const;
+    enum TokenType current_token() const;
 
     bool operator==(char c);
+    bool operator==(Keyword k);
 
 private:
     std::ifstream input_file_;
     std::string current_token_;
     char current_char_{};
     void skipWs();
+    TokenType token;
     Lexer *subfile{nullptr};
 
     const std::map<std::string, enum Keyword> keywords = {{"CTRL", CTRL}};
-    const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ',', ';', '<', '>', '=', '.'};
+    const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ':', ',', ';', '<', '>', '=', '.'};
 };
+
+#endif // MILA_LEXER_H
