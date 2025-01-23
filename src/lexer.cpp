@@ -55,6 +55,10 @@ Lexer::TokenType Lexer::getToken() {
             subfile = new Lexer(filename);
             return getToken();
         }
+
+        if (keywords.find(current_token_) != keywords.end()) {
+            return KEYWORD;
+        }
         return IDENTIFIER;
     }
 
@@ -96,4 +100,8 @@ void Lexer::skipWs() {
 
 bool Lexer::operator==(char c) {
     return getToken() == PUNCTUATION && current_char_ == c;
+}
+
+Lexer::Keyword Lexer::key() const {
+    return keywords.at(current_token_);
 }

@@ -3,6 +3,7 @@
 #include <cctype>
 #include <stdexcept>
 #include <set>
+#include <map>
 
 #define NUM_TYPE long long
 
@@ -12,13 +13,19 @@ public:
         IDENTIFIER,
         NUMERIC_LITERAL,
         PUNCTUATION,
+        KEYWORD,
         END
+    };
+
+    enum Keyword {
+        CTRL,
     };
 
     explicit Lexer(const std::string& filename);
     TokenType getToken();
     std::string id() const;
     NUM_TYPE num() const;
+    enum Keyword key() const;
     char punc() const;
 
     bool operator==(char c);
@@ -30,6 +37,6 @@ private:
     void skipWs();
     Lexer *subfile{nullptr};
 
-
+    const std::map<std::string, enum Keyword> keywords = {{"CTRL", CTRL}};
     const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ',', ';', '<', '>', '=', '.'};
 };
