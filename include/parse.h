@@ -14,7 +14,7 @@ typedef std::map<std::string, NUM_TYPE> macro_tab;
 
 typedef struct {
     num_list exp_list;
-    int width; // stores the width of the largest element
+    NUM_TYPE width; // stores the width of the largest element
 } expansion_list;
 typedef std::map<std::string, expansion_list> expansion_list_tab;
 
@@ -27,6 +27,7 @@ typedef struct {
     bool param;
     std::shared_ptr<expansion_list_param> exp_param;
     NUM_TYPE num_literal;
+    NUM_TYPE width;
 } context_expr;
 typedef std::pair<NUM_TYPE, std::vector<std::pair<std::string, context_expr>>> statement;
 typedef std::vector<statement> statement_list;

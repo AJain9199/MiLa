@@ -246,7 +246,12 @@ void Parser::parseContextBlock() {
 void Parser::parseContextList() {
     while (lexer == '(') {
         eat('(');
-        context[depth].push_back(parseContextExpr());
+        auto expr = parseContextExpr();
+        if (lexer == ':') {
+            eat(':');
+            NUM_TYPE w = eat_num();
+            expr.width = w;
+        }
         eat(')');
     }
 }
@@ -259,9 +264,10 @@ context_expr Parser::parseContextExpr() {
         eat(':');
         NUM_TYPE idx = eat_num();
         eat('>');
-        return {true, make_shared<expansion_list_param>(name, idx), 0};
+        return {true, make_shared<expansion_list_param>(name, idx), 0, resolve_expansion_list(name).width};
     } else {
-        return {false, nullptr, parseExpr()};
+        NUM_TYPE val = parseExpr();
+        return {false, nullptr, val, (NUM_TYPE)(bit_width(val))};
     }
 }
 
@@ -314,10 +320,10 @@ NUM_TYPE Parser::resolve_context_descriptor(const vector<context_expr> &desc, co
     for (const auto& i : desc) {
         if (i.param) {
             auto [exp_list, width] = resolve_expansion_list(i.exp_param->exp_name);
-            translation <<= width;
+            translation <<= i.width;
             translation |= exp_list[indices[exp_list_resolution_tab.at(i.exp_param->exp_name)[i.exp_param->idx]]];
         } else {
-            translation <<= bit_width(i.num_literal);
+            translation <<= i.width;
             translation |= i.num_literal;
         }
     }
@@ -326,7 +332,6 @@ NUM_TYPE Parser::resolve_context_descriptor(const vector<context_expr> &desc, co
 
 void Parser::resolve_context_block(const pair<vector<context_expr>, statement_list> &block) {
     auto ctxt = block.first;
-    vector<vector<int> *> exp_lists;
     vector<unsigned long long> indices;
     map<string, vector<int>> exp_idx;
 
