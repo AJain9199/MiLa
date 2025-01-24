@@ -64,7 +64,7 @@ Lexer::TokenType Lexer::getToken() {
 
     // numeric literal
     if (std::isdigit(current_char_)) {
-        while (std::isdigit(current_char_)) {
+        while (std::isalnum(current_char_)) {
             current_token_ += current_char_;
             current_char_ = input_file_.get();
         }
@@ -85,7 +85,7 @@ std::string Lexer::id() const {
 }
 
 NUM_TYPE Lexer::num() const {
-    return stoll(current_token_);
+    return stoll(current_token_, nullptr, 0);
 }
 
 char Lexer::punc() const {
