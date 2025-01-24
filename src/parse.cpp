@@ -2,10 +2,42 @@
 #include <error.h>
 #include <string>
 #include <format>
+#include <stack>
 
 #define perr(msg) err(msg, PARSE)
 
 using namespace std;
+
+template <typename T>
+void cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indices, typename vector<T>::size_type idx) {
+    int u = indices[idx];
+    for (int i = 0; i < u; i++) {
+        frontier.push_back(i);
+        if (idx == 0) {
+            accum.push_back(frontier);
+        } else {
+            cartesian_recurse(accum, frontier, indices, idx-1);
+        }
+        frontier.pop_back();
+    }
+}
+
+
+/*
+ * Returns a cartesian product for indices, given the ending indices.
+ * E.g. With input, [2, 3, 1],
+ * The output is a vector of [0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 0, 0]...
+ * */
+template <typename T>
+vector<vector<int>> cartesian_product(const vector<T>& indices) {
+    vector<vector<int>> accum;
+    vector<int> frontier;
+
+    if (!indices.empty()) {
+        cartesian_recurse(accum, frontier, indices, indices.size()-1);
+    }
+    return accum;
+}
 
 void Parser::parseAssignmentDecl() {
     string name = eat_id();
@@ -202,7 +234,15 @@ void Parser::parseContextBlock() {
             statement_tab[depth].push_back(parseStmt());
         }
     }
-    statement_tab[depth] = parseStmtList();
+
+    vector<context_expr> context_list;
+    for (const auto& i : context) {
+        for (const auto& j : i) {
+            context_list.push_back(j);
+        }
+    }
+
+    translation_table.emplace_back(context_list, statement_tab[depth]);
 }
 
 void Parser::parseContextList() {

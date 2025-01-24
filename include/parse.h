@@ -48,6 +48,8 @@ private:
     std::map<std::string, std::pair<int, int>> bitset_tab{};
     std::vector<statement_list> statement_tab;
 
+    std::vector<std::pair<std::vector<context_expr>, statement_list>> translation_table;
+
     Lexer lexer;
 
     std::vector<std::vector<context_expr>> context;
