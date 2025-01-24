@@ -200,26 +200,19 @@ void Parser::parseCode() {
     }
 }
 
+template <typename T>
+void init_depth_list(vector<T> l, int d) {
+    if (l.size() > d) {
+        l[d] = {};
+    }
+    l.emplace_back();
+}
+
 void Parser::init_var_depth(int d) {
-    if (macro_symtab.size() > d) {
-        macro_symtab[d] = {};
-    }
-    macro_symtab.emplace_back();
-
-    if (expansion_list_symtab.size() > d) {
-        expansion_list_symtab[d] = {};
-    }
-    expansion_list_symtab.emplace_back();
-
-    if (context.size() > d) {
-        context[d] = {};
-    }
-    context.emplace_back();
-
-    if (statement_tab.size() > d) {
-        statement_tab[d] = {};
-    }
-    statement_tab.emplace_back();
+    init_depth_list(macro_symtab, d);
+    init_depth_list(expansion_list_symtab, d);
+    init_depth_list(context, d);
+    init_depth_list(statement_tab, d);
 }
 
 void Parser::parseContextBlock() {
