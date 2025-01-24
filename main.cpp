@@ -5,7 +5,7 @@
 using namespace std;
 
 int main() {
-    Parser parse( "tst.micro");
+    Parser parse( "MOV.micro");
 
     parse.parseCode();
     parse.resolve();

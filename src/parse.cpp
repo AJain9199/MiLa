@@ -3,10 +3,24 @@
 #include <string>
 #include <format>
 #include <stack>
+#include <bitset>
 
 #define perr(msg) err(msg, PARSE)
 
 using namespace std;
+
+string to_bin(NUM_TYPE n, NUM_TYPE w) {
+    string ans;
+    for (int i = 0; i <= w-1; i++) {
+        if (n & (1 << i)) {
+            ans += '1';
+        } else {
+            ans += '0';
+        }
+    }
+    reverse(ans.begin(), ans.end());
+    return ans;
+}
 
 template<typename T>
 void
@@ -27,7 +41,7 @@ cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indice
 /*
  * Returns a cartesian product for indices, given the ending indices.
  * E.g. With input, [2, 3, 1],
- * The output is a vector of [0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 0, 0]...
+ * The resolved is a vector of [0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 0, 0]...
  * */
 template<typename T>
 vector<vector<T>> cartesian_product(const vector<T> &indices) {
@@ -72,7 +86,7 @@ void Parser::parseCtrlWordDecl() {
     eat(Lexer::CTRL);
 
     eat('{');
-    int pos = 0;
+    NUM_TYPE pos = 0;
     while (lexer != '}') {
         string name = eat_id();
 
@@ -96,6 +110,7 @@ void Parser::parseCtrlWordDecl() {
             break;
         }
     }
+    ctrl_word_width = max(ctrl_word_width, pos);
 }
 
 NUM_TYPE Parser::parseExpr(bool bit_def) {
@@ -378,7 +393,7 @@ void Parser::resolve_context_block(const pair<vector<context_expr>, statement_li
                 val.push_back(resolve_statement(stmt, perm, exp_idx));
             }
 
-            output.emplace_back(key, val);
+            resolved.emplace_back(key, val);
         }
     } else {
         NUM_TYPE key = resolve_context_descriptor(ctxt, {}, {});
@@ -387,11 +402,11 @@ void Parser::resolve_context_block(const pair<vector<context_expr>, statement_li
             val.push_back(resolve_statement(stmt, {}, {}));
         }
 
-        output.emplace_back(key, val);
+        resolved.emplace_back(key, val);
     }
 }
 
-unsigned long long int Parser::resolve_statement(const statement &stmt, const vector<unsigned long long> &indices,
+NUM_TYPE Parser::resolve_statement(const statement &stmt, const vector<unsigned long long> &indices,
                                                  const map<string, vector<int>> &exp_list_resolution_tab
                                                  ) {
     NUM_TYPE translation = stmt.first;
@@ -418,6 +433,29 @@ unsigned long long int Parser::resolve_statement(const statement &stmt, const ve
 void Parser::resolve() {
     for (const auto &i : translation_table) {
         resolve_context_block(i);
+    }
+
+    // calculate maximum number of microcode instructions for any instruction
+    // bit width of the maximum no. of instructions becomes the width of our clock counter
+    unsigned long long max_n_is = 0, max_ins = 0;
+    for (const auto &[inst, subi] : resolved) {
+        max_n_is = max(max_n_is, subi.size());
+        max_ins = max(max_ins, inst);
+    }
+
+    int clock_w = bit_width(max_n_is);
+    int max_clock_val = (1<<clock_w)-1;
+
+    unsigned long long ins_w = bit_width(max_ins) + clock_w;
+
+    // shift all existing instructions max_n_is bits to the left
+    // instead of a nested vector of subcommands, the index is encoded in the least significant max_n_is bits
+    for (const auto &[ins, sub] : resolved) {
+        for (int i = 0; i < max_clock_val; i++) {
+            output.emplace_back((ins << clock_w) | i, (i < sub.size()?sub[i]:default_value));
+
+            cout << to_bin((ins << clock_w) | i, ins_w) << ": " << to_bin((i < sub.size()?sub[i]:default_value), ctrl_word_width) << '\n';
+        }
     }
 }
 

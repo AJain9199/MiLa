@@ -60,7 +60,8 @@ private:
     Lexer lexer;
 
     std::vector<std::vector<context_expr>> context;
-    std::vector<std::pair<NUM_TYPE, std::vector<NUM_TYPE>>> output;
+    std::vector<std::pair<NUM_TYPE, std::vector<NUM_TYPE>>> resolved;
+    std::vector<std::pair<NUM_TYPE, NUM_TYPE>> output;
 
     num_list parseNumList();
 
@@ -83,6 +84,9 @@ private:
     NUM_TYPE eat_num();
 
     void init_var_depth(int d);
+
+    NUM_TYPE default_value = 0;
+    NUM_TYPE ctrl_word_width = 0;
 };
 
 #endif //MILA_PARSER_H
