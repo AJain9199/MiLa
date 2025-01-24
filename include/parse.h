@@ -61,11 +61,12 @@ private:
     num_list parseNumList();
 
     NUM_TYPE resolve_macro(const std::string &);
-    num_list resolve_expansion_list(const std::string &);
+    expansion_list resolve_expansion_list(const std::string &);
     std::pair<int, int> resolve_bitset(const std::string &);
-
+    NUM_TYPE resolve_context_descriptor(const std::vector<context_expr> &desc, const std::vector<unsigned long long> &indices, const std::map<std::string, std::vector<int>> &exp_list_resolution_tab);
     NUM_TYPE resolve_context_block(const std::pair<std::vector<context_expr>, statement_list> &ctxt);
 
+    std::vector<std::pair<NUM_TYPE, std::vector<NUM_TYPE>>> output;
 
     void eat(char);
     std::string eat_id();

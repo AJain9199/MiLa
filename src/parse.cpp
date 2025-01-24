@@ -303,3 +303,19 @@ statement Parser::parseStmt() {
     }
     return stmt;
 }
+
+NUM_TYPE Parser::resolve_context_descriptor(const vector<context_expr> &desc, const vector<unsigned long long> &indices, const map<string, vector<int>> &exp_list_resolution_tab) {
+    NUM_TYPE translation = 0;
+    for (const auto& i : desc) {
+        if (i.param) {
+            auto [exp_list, width] = resolve_expansion_list(i.exp_param->exp_name);
+            translation <<= width;
+            translation |= exp_list[indices[exp_list_resolution_tab.at(i.exp_param->exp_name)[i.exp_param->idx]]];
+        } else {
+            translation <<= bit_width(i.num_literal);
+            translation |= i.num_literal;
+        }
+    }
+    return translation;
+}
+
