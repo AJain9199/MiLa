@@ -61,7 +61,7 @@ void Parser::parseAssignmentDecl() {
 
         num_list val = parseNumList();
         // calculate maximum bit width
-        expansion_list_symtab[depth][name] = {val, bit_width(*max_element(val.begin(), val.end()))};
+        expansion_list_symtab[depth][name] = {val, (NUM_TYPE)bit_width(*max_element(val.begin(), val.end()))};
     } else {
         macro_symtab[depth][name] = parseExpr(bit_def);
     }
@@ -194,7 +194,10 @@ void Parser::parseCode() {
         if (lexer == Lexer::CTRL) {
             parseCtrlWordDecl();
         } else if (lexer == '(') {
-            parseContextBlock();
+            auto stmts = parseContextBlock();
+            for (const auto &i : stmts) {
+                translation_table.push_back(i);
+            }
         } else {
             parseAssignmentDecl();
         }
@@ -216,31 +219,56 @@ void Parser::init_var_depth(int d) {
     init_depth_list(statement_tab, d);
 }
 
-void Parser::parseContextBlock() {
+vector<pair<vector<context_expr>, statement_list>> Parser::parseContextBlock() {
     depth++;
     init_var_depth(depth);
     parseContextList();
     eat('{');
+
+    vector<pair<vector<context_expr>, statement_list>> result;
+    statement_list starting, ending;
+
+    while (lexer != '(' && lexer != '}') {
+        starting.push_back(parseStmt());
+    }
+    bool nested = true;
+    if (lexer == '}') {
+        nested = false;
+    }
+
     while (lexer != '}') {
         if (lexer == '(') {
-            parseContextBlock();
+            auto tmp = parseContextBlock();
+            for (const auto& i : tmp) {
+                result.push_back(i);
+            }
         } else {
-            statement_tab[depth].push_back(parseStmt());
+            ending.push_back(parseStmt());
         }
     }
 
     eat('}');
 
     vector<context_expr> context_list;
-    for (const auto &i: context) {
-        for (const auto &j: i) {
+    for (int i = 0; i <= depth; i++) {
+        for (const auto &j : context[i]) {
             context_list.push_back(j);
         }
     }
 
-    translation_table.emplace_back(context_list, statement_tab[depth]);
-
     depth--;
+    if (nested) {
+        for (auto &[ctxt, stmt] : result) {
+            stmt.insert(stmt.begin(), starting.begin(), starting.end());
+            for (const auto &x:ending) {
+                stmt.push_back(x);
+            }
+        }
+
+        return result;
+    } else {
+        return {{context_list, starting}};
+    }
 }
 
 void Parser::parseContextList() {
@@ -252,6 +280,8 @@ void Parser::parseContextList() {
             NUM_TYPE w = eat_num();
             expr.width = w;
         }
+
+        context[depth].push_back(expr);
         eat(')');
     }
 }
@@ -271,22 +301,10 @@ context_expr Parser::parseContextExpr() {
     }
 }
 
-statement_list Parser::parseStmtList() {
-    statement_list stmt_list;
-
-    eat('{');
-    while (lexer != '}') {
-        stmt_list.push_back(parseStmt());
-    }
-    eat('}');
-    return stmt_list;
-}
-
 statement Parser::parseStmt() {
     statement stmt;
     stmt.first = 0;
     while (lexer != ';') {
-        NUM_TYPE val;
         if (lexer.current_token() == Lexer::IDENTIFIER) {
             string name = eat_id();
 

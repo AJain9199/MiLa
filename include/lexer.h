@@ -26,11 +26,11 @@ public:
 
     explicit Lexer(const std::string& filename);
     TokenType getToken();
-    std::string id() const;
-    NUM_TYPE num() const;
-    enum Keyword key() const;
-    char punc() const;
-    enum TokenType current_token() const;
+    [[nodiscard]] std::string id() const;
+    [[nodiscard]] NUM_TYPE num() const;
+    [[nodiscard]] enum Keyword key() const;
+    [[nodiscard]] char punc() const;
+    [[nodiscard]] enum TokenType current_token() const;
 
     bool operator==(char c);
     bool operator==(Keyword k);

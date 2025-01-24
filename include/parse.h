@@ -29,6 +29,7 @@ typedef struct {
     NUM_TYPE num_literal;
     NUM_TYPE width;
 } context_expr;
+
 typedef std::pair<NUM_TYPE, std::vector<std::pair<std::string, context_expr>>> statement;
 typedef std::vector<statement> statement_list;
 
@@ -37,8 +38,7 @@ public:
     explicit Parser(const std::string &);
     void parseCode();
     void parseAssignmentDecl();
-    void parseContextBlock();
-    statement_list parseStmtList();
+    std::vector<std::pair<std::vector<context_expr>, statement_list>> parseContextBlock();
     statement parseStmt();
     void parseContextList();
     void parseCtrlWordDecl();
@@ -60,6 +60,7 @@ private:
     Lexer lexer;
 
     std::vector<std::vector<context_expr>> context;
+    std::vector<std::pair<NUM_TYPE, std::vector<NUM_TYPE>>> output;
 
     num_list parseNumList();
 
@@ -74,7 +75,6 @@ private:
                                              const std::map<std::string, std::vector<int>> &exp_list_resolution_tab
                                              );
 
-    std::vector<std::pair<NUM_TYPE, std::vector<NUM_TYPE>>> output;
 
     void eat(char);
     std::string eat_id();
