@@ -44,6 +44,8 @@ public:
     NUM_TYPE parseExpr(bool bit_def=false);
     context_expr parseContextExpr();
 
+    void resolve();
+
 
 private:
     int depth = 0;

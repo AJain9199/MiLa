@@ -8,6 +8,7 @@ int main() {
     Parser parse( "tst.micro");
 
     parse.parseCode();
+    parse.resolve();
 
     return 0;
 }

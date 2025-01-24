@@ -387,3 +387,27 @@ unsigned long long int Parser::resolve_statement(const statement &stmt, const ve
     return translation;
 }
 
+void Parser::resolve() {
+    for (const auto &i : translation_table) {
+        resolve_context_block(i);
+    }
+}
+
+expansion_list Parser::resolve_expansion_list(const string &name) {
+    for (int d = depth; d >= 0; d--) {
+        if (expansion_list_symtab[d].find(name) != expansion_list_symtab[d].end()) {
+            return expansion_list_symtab[d].at(name);
+        }
+    }
+
+    perr(format("Requested expansion list {} not found in current context", name));
+}
+
+std::pair<int, int> Parser::resolve_bitset(const string &name) {
+    if (bitset_tab.find(name) != bitset_tab.end()) {
+        return bitset_tab[name];
+    }
+
+    perr(format("Requested bitset {} not defined.", name));
+}
+
