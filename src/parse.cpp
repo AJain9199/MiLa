@@ -8,15 +8,16 @@
 
 using namespace std;
 
-template <typename T>
-void cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indices, typename vector<T>::size_type idx) {
+template<typename T>
+void
+cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indices, typename vector<T>::size_type idx) {
     int u = indices[idx];
     for (int i = 0; i < u; i++) {
         frontier.push_back(i);
         if (idx == 0) {
             accum.push_back(frontier);
         } else {
-            cartesian_recurse(accum, frontier, indices, idx-1);
+            cartesian_recurse(accum, frontier, indices, idx - 1);
         }
         frontier.pop_back();
     }
@@ -28,13 +29,13 @@ void cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> i
  * E.g. With input, [2, 3, 1],
  * The output is a vector of [0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 0, 0]...
  * */
-template <typename T>
-vector<vector<int>> cartesian_product(const vector<T>& indices) {
+template<typename T>
+vector<vector<int>> cartesian_product(const vector<T> &indices) {
     vector<vector<int>> accum;
     vector<int> frontier;
 
     if (!indices.empty()) {
-        cartesian_recurse(accum, frontier, indices, indices.size()-1);
+        cartesian_recurse(accum, frontier, indices, indices.size() - 1);
     }
     return accum;
 }
@@ -59,8 +60,8 @@ void Parser::parseAssignmentDecl() {
         }
 
         num_list val = parseNumList();
-
-        expansion_list_symtab[depth][name] = val;
+        // calculate maximum bit width
+        expansion_list_symtab[depth][name] = {val, bit_width(*max_element(val.begin(), val.end()))};
     } else {
         macro_symtab[depth][name] = parseExpr(bit_def);
     }
@@ -200,7 +201,7 @@ void Parser::parseCode() {
     }
 }
 
-template <typename T>
+template<typename T>
 void init_depth_list(vector<T> l, int d) {
     if (l.size() > d) {
         l[d] = {};
@@ -229,8 +230,8 @@ void Parser::parseContextBlock() {
     }
 
     vector<context_expr> context_list;
-    for (const auto& i : context) {
-        for (const auto& j : i) {
+    for (const auto &i: context) {
+        for (const auto &j: i) {
             context_list.push_back(j);
         }
     }

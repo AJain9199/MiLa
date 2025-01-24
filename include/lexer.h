@@ -8,7 +8,7 @@
 #include <set>
 #include <map>
 
-#define NUM_TYPE long long
+#define NUM_TYPE unsigned long long
 
 class Lexer {
 public:

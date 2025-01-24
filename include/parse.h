@@ -9,10 +9,14 @@
 
 typedef long long ll;
 
-
 typedef std::vector<NUM_TYPE> num_list;
-typedef std::map<std::string, num_list> expansion_list_tab;
 typedef std::map<std::string, NUM_TYPE> macro_tab;
+
+typedef struct {
+    num_list exp_list;
+    int width; // stores the width of the largest element
+} expansion_list;
+typedef std::map<std::string, expansion_list> expansion_list_tab;
 
 typedef struct {
     std::string exp_name;
@@ -57,7 +61,11 @@ private:
     num_list parseNumList();
 
     NUM_TYPE resolve_macro(const std::string &);
+    num_list resolve_expansion_list(const std::string &);
     std::pair<int, int> resolve_bitset(const std::string &);
+
+    NUM_TYPE resolve_context_block(const std::pair<std::vector<context_expr>, statement_list> &ctxt);
+
 
     void eat(char);
     std::string eat_id();
