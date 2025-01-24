@@ -30,9 +30,9 @@ cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indice
  * The output is a vector of [0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 0, 0]...
  * */
 template<typename T>
-vector<vector<int>> cartesian_product(const vector<T> &indices) {
-    vector<vector<int>> accum;
-    vector<int> frontier;
+vector<vector<T>> cartesian_product(const vector<T> &indices) {
+    vector<vector<T>> accum;
+    vector<T> frontier;
 
     if (!indices.empty()) {
         cartesian_recurse(accum, frontier, indices, indices.size() - 1);
@@ -317,6 +317,50 @@ NUM_TYPE Parser::resolve_context_descriptor(const vector<context_expr> &desc, co
         }
     }
     return translation;
+}
+
+NUM_TYPE Parser::resolve_context_block(const pair<vector<context_expr>, statement_list> &block) {
+    auto ctxt = block.first;
+    vector<vector<int> *> exp_lists;
+    vector<unsigned long long> indices;
+    map<string, vector<int>> exp_idx;
+
+    int idx = 0;
+    bool param = false;
+    for (const auto &i: ctxt) {
+        if (!i.param) {
+            continue;
+        }
+
+        param = true;
+
+        num_list exp = resolve_expansion_list(i.exp_param->exp_name).exp_list;
+        exp_idx[i.exp_param->exp_name].reserve(i.exp_param->idx + 1);
+        exp_idx[i.exp_param->exp_name][i.exp_param->idx] = idx;
+        indices.push_back(exp.size());
+        idx++;
+    }
+
+    if (param) {
+        vector<vector<unsigned long long>> cart_prod = cartesian_product(indices);
+        for (const auto& perm : cart_prod) {
+            NUM_TYPE key = resolve_context_descriptor(ctxt, perm, exp_idx);
+            num_list val;
+            for (const auto &stmt : block.second) {
+                val.push_back(resolve_statement(stmt, perm, exp_idx));
+            }
+
+            output.emplace_back(key, val);
+        }
+    } else {
+        NUM_TYPE key = resolve_context_descriptor(ctxt, {}, {});
+        num_list val;
+        for (const auto &stmt: block.second) {
+            val.push_back(resolve_statement(stmt, {}, {}));
+        }
+
+        output.emplace_back(key, val);
+    }
 }
 
 unsigned long long int Parser::resolve_statement(const statement &stmt, const vector<unsigned long long> &indices,
