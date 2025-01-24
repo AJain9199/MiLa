@@ -65,5 +65,11 @@ This code on compilation produces the following output:
 ...
 ```
 
+## Upcoming features:
+- Conditional expansion
+- Different Output formats
+- Friendlier syntax (?)
+- ...
+
 [license-shield]: https://img.shields.io/github/license/AJain9199/MiLa.svg?style=for-the-badge
 [license-url]: https://github.com/AJain9199/MiLa/blob/master/LICENSE.txt
