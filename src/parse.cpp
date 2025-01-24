@@ -50,7 +50,7 @@ void Parser::parseAssignmentDecl() {
 
     eat('=');
 
-    if (lexer == Lexer::PUNCTUATION) {
+    if (lexer.current_token() == Lexer::PUNCTUATION) {
         if (lexer.punc() != '[') {
             perr(format("Expected numeric literal, macro, or expansion list. Found '{}' instead.", lexer.punc()));
         }
@@ -202,7 +202,7 @@ void Parser::parseCode() {
 }
 
 template<typename T>
-void init_depth_list(vector<T> l, int d) {
+void init_depth_list(vector<T> &l, int d) {
     if (l.size() > d) {
         l[d] = {};
     }
@@ -229,6 +229,8 @@ void Parser::parseContextBlock() {
         }
     }
 
+    eat('}');
+
     vector<context_expr> context_list;
     for (const auto &i: context) {
         for (const auto &j: i) {
@@ -237,6 +239,8 @@ void Parser::parseContextBlock() {
     }
 
     translation_table.emplace_back(context_list, statement_tab[depth]);
+
+    depth--;
 }
 
 void Parser::parseContextList() {
@@ -248,12 +252,13 @@ void Parser::parseContextList() {
 }
 
 context_expr Parser::parseContextExpr() {
-    if (lexer == '%') {
+    if (lexer == '<') {
+        lexer.getToken();
         string name = eat_id();
 
         eat(':');
         NUM_TYPE idx = eat_num();
-        eat('%');
+        eat('>');
         return {true, make_shared<expansion_list_param>(name, idx), 0};
     } else {
         return {false, nullptr, parseExpr()};
@@ -335,7 +340,7 @@ void Parser::resolve_context_block(const pair<vector<context_expr>, statement_li
         param = true;
 
         num_list exp = resolve_expansion_list(i.exp_param->exp_name).exp_list;
-        exp_idx[i.exp_param->exp_name].reserve(i.exp_param->idx + 1);
+        exp_idx[i.exp_param->exp_name].resize(i.exp_param->idx + 1);
         exp_idx[i.exp_param->exp_name][i.exp_param->idx] = idx;
         indices.push_back(exp.size());
         idx++;
