@@ -64,7 +64,8 @@ private:
     expansion_list resolve_expansion_list(const std::string &);
     std::pair<int, int> resolve_bitset(const std::string &);
     NUM_TYPE resolve_context_descriptor(const std::vector<context_expr> &desc, const std::vector<unsigned long long> &indices, const std::map<std::string, std::vector<int>> &exp_list_resolution_tab);
-    NUM_TYPE resolve_context_block(const std::pair<std::vector<context_expr>, statement_list> &ctxt);
+
+    void resolve_context_block(const std::pair<std::vector<context_expr>, statement_list> &block);
 
     unsigned long long int resolve_statement(const statement &stmt, const std::vector<unsigned long long int> &indices,
                                              const std::map<std::string, std::vector<int>> &exp_list_resolution_tab
