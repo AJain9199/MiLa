@@ -66,6 +66,10 @@ private:
     NUM_TYPE resolve_context_descriptor(const std::vector<context_expr> &desc, const std::vector<unsigned long long> &indices, const std::map<std::string, std::vector<int>> &exp_list_resolution_tab);
     NUM_TYPE resolve_context_block(const std::pair<std::vector<context_expr>, statement_list> &ctxt);
 
+    unsigned long long int resolve_statement(const statement &stmt, const std::vector<unsigned long long int> &indices,
+                                             const std::map<std::string, std::vector<int>> &exp_list_resolution_tab
+                                             );
+
     std::vector<std::pair<NUM_TYPE, std::vector<NUM_TYPE>>> output;
 
     void eat(char);

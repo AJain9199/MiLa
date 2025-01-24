@@ -319,3 +319,27 @@ NUM_TYPE Parser::resolve_context_descriptor(const vector<context_expr> &desc, co
     return translation;
 }
 
+unsigned long long int Parser::resolve_statement(const statement &stmt, const vector<unsigned long long> &indices,
+                                                 const map<string, vector<int>> &exp_list_resolution_tab
+                                                 ) {
+    NUM_TYPE translation = stmt.first;
+
+    for (const auto &i : stmt.second) {
+        auto [bitset_var, expr] = i;
+        auto [l, r] = resolve_bitset(bitset_var);
+        NUM_TYPE val;
+        if (expr.param) {
+            auto [exp_list, width] = resolve_expansion_list(expr.exp_param->exp_name);
+            val = exp_list[indices[exp_list_resolution_tab.at(expr.exp_param->exp_name)[expr.exp_param->idx]]];
+
+            if (bit_width(val) > (r-l+1)) {
+                perr(format("Value {} of expansion list parameter exceed bit-width {} of bitset {}", val, (r-l+1), bitset_var));
+            }
+        } else {
+             val = expr.num_literal;
+        }
+        translation |= (val << l);
+    }
+    return translation;
+}
+
