@@ -44,7 +44,7 @@ private:
     Lexer *subfile{nullptr};
 
     const std::map<std::string, enum Keyword> keywords = {{"CTRL", CTRL}};
-    const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ':', ',', ';', '<', '>', '=', '.'};
+    const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ':', ',', ';', '<', '>', '=', '.', '~'};
 };
 
 #endif // MILA_LEXER_H

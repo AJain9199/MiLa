@@ -10,7 +10,12 @@
 typedef long long ll;
 
 typedef std::vector<NUM_TYPE> num_list;
-typedef std::map<std::string, NUM_TYPE> macro_tab;
+
+typedef struct {
+    NUM_TYPE value;
+    bool is_inverted;
+} macro_decl;
+typedef std::map<std::string, macro_decl> macro_tab;
 
 typedef struct {
     num_list exp_list;
@@ -65,7 +70,7 @@ private:
 
     num_list parseNumList();
 
-    NUM_TYPE resolve_macro(const std::string &);
+    macro_decl resolve_macro(const std::string &);
     expansion_list resolve_expansion_list(const std::string &);
     std::pair<int, int> resolve_bitset(const std::string &);
     NUM_TYPE resolve_context_descriptor(const std::vector<context_expr> &desc, const std::vector<unsigned long long> &indices, const std::map<std::string, std::vector<int>> &exp_list_resolution_tab);
@@ -75,6 +80,9 @@ private:
     unsigned long long int resolve_statement(const statement &stmt, const std::vector<unsigned long long int> &indices,
                                              const std::map<std::string, std::vector<int>> &exp_list_resolution_tab
                                              );
+
+    static macro_decl init_macro_decl(NUM_TYPE pos, bool is_inverted);
+    static void macro_concat(NUM_TYPE &val, macro_decl m_decl);
 
 
     void eat(char);

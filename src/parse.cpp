@@ -55,7 +55,13 @@ vector<vector<T>> cartesian_product(const vector<T> &indices) {
 }
 
 void Parser::parseAssignmentDecl() {
-    string name = eat_id();
+    bool is_inverted = false;
+    if (lexer.current_token() == Lexer::PUNCTUATION) {
+        eat('~');
+        is_inverted = true;
+    }
+
+    const string name = eat_id();
     bool bit_def = false;
 
     if (lexer == ':') {
@@ -75,9 +81,9 @@ void Parser::parseAssignmentDecl() {
 
         num_list val = parseNumList();
         // calculate maximum bit width
-        expansion_list_symtab[depth][name] = {val, (NUM_TYPE)bit_width(*max_element(val.begin(), val.end()))};
+        expansion_list_symtab[depth][name] = {val, (NUM_TYPE)bit_width(*ranges::max_element(val))};
     } else {
-        macro_symtab[depth][name] = parseExpr(bit_def);
+        macro_symtab[depth][name] = init_macro_decl(parseExpr(bit_def), is_inverted);
     }
     eat(';');
 }
@@ -88,6 +94,12 @@ void Parser::parseCtrlWordDecl() {
     eat('{');
     NUM_TYPE pos = 0;
     while (lexer != '}') {
+        bool is_inverted = false;
+        if (lexer.current_token() == Lexer::PUNCTUATION) {
+            eat('~');
+            is_inverted = true;
+        }
+
         string name = eat_id();
 
         int width = 1;
@@ -98,7 +110,11 @@ void Parser::parseCtrlWordDecl() {
             width = eat_num();
             bitset_tab[name] = make_pair(pos, pos + width - 1);
         } else {
-            macro_symtab[0][name] = 1 << pos;
+            macro_symtab[0][name] = init_macro_decl(pos, is_inverted);
+
+            if (is_inverted) {
+                default_value |= (1 << pos);
+            }
         }
 
         pos += width;
@@ -114,12 +130,12 @@ void Parser::parseCtrlWordDecl() {
 }
 
 NUM_TYPE Parser::parseExpr(bool bit_def) {
-    NUM_TYPE val;
+    NUM_TYPE val = 0;
     if (lexer.current_token() == Lexer::NUMERIC_LITERAL) {
         val = lexer.num();
         lexer.getToken();
     } else if (lexer.current_token() == Lexer::IDENTIFIER) {
-        val = resolve_macro(lexer.id());
+        macro_concat(val, resolve_macro(lexer.id()));
         lexer.getToken();
     } else {
         perr("Unexpected lvalue for assignment.");
@@ -146,14 +162,14 @@ num_list Parser::parseNumList() {
     return val;
 }
 
-NUM_TYPE Parser::resolve_macro(const string &name) {
+macro_decl Parser::resolve_macro(const string &name) {
     for (int i = depth; i >= 0; i--) {
-        if (macro_symtab[i].find(name) != macro_symtab[i].end()) {
+        if (macro_symtab[i].contains(name)) {
             return macro_symtab[i][name];
         }
     }
     perr(format("No value found for macro \"{}\" in current context", name));
-    return 0;
+    return {0, false};
 }
 
 void Parser::eat(char c) {
@@ -318,7 +334,7 @@ context_expr Parser::parseContextExpr() {
 
 statement Parser::parseStmt() {
     statement stmt;
-    stmt.first = 0;
+    stmt.first = default_value;
     while (lexer != ';') {
         if (lexer.current_token() == Lexer::IDENTIFIER) {
             string name = eat_id();
@@ -332,7 +348,7 @@ statement Parser::parseStmt() {
                 context_expr ex = parseContextExpr();
                 stmt.second.emplace_back(name, ex);
             } else {
-                stmt.first |= resolve_macro(name);
+                macro_concat(stmt.first, resolve_macro(name));
             }
         } else {
             stmt.first |= parseExpr();
@@ -428,6 +444,14 @@ NUM_TYPE Parser::resolve_statement(const statement &stmt, const vector<unsigned 
         translation |= (val << l);
     }
     return translation;
+}
+
+macro_decl Parser::init_macro_decl(NUM_TYPE pos, bool is_inverted) {
+    return {is_inverted?(~(1ull << pos)):(1ull << pos), is_inverted};
+}
+
+void Parser::macro_concat(unsigned long long &val, macro_decl m_decl) {
+    val = m_decl.is_inverted?(val&m_decl.value):(val|m_decl.value);
 }
 
 void Parser::resolve() {
