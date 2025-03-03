@@ -470,15 +470,15 @@ void Parser::resolve() {
     int clock_w = bit_width(max_n_is);
     int max_clock_val = (1<<clock_w)-1;
 
-    unsigned long long ins_w = bit_width(max_ins) + clock_w;
+    ins_width = bit_width(max_ins) + clock_w;
 
     // shift all existing instructions max_n_is bits to the left
     // instead of a nested vector of subcommands, the index is encoded in the least significant max_n_is bits
     for (const auto &[ins, sub] : resolved) {
         for (int i = 0; i < max_clock_val; i++) {
-            output.emplace_back((ins << clock_w) | i, (i < sub.size()?sub[i]:default_value));
+            output[(ins << clock_w) | i] = i < sub.size()?sub[i]:default_value;
 
-            cout << to_bin((ins << clock_w) | i, ins_w) << ": " << to_bin((i < sub.size()?sub[i]:default_value), ctrl_word_width) << '\n';
+            cout << to_bin((ins << clock_w) | i, ins_width) << ": " << to_bin((i < sub.size()?sub[i]:default_value), ctrl_word_width) << '\n';
         }
     }
 }
