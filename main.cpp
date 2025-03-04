@@ -16,6 +16,10 @@ int main(const int argc, char *argv[]) {
     parse.parseCode();
     parse.resolve();
 
+    cout << "Clock bit-width: " << parse.counter_width << endl;
+    cout << "Instruction width: " << parse.ins_width << endl;
+    cout << "Control word width: " << parse.ctrl_word_width << endl;
+
     string fname = "file.out";
     if (argc > 2) {
         fname = argv[2];

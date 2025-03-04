@@ -8,7 +8,7 @@
 
 using namespace std;
 
-string to_bin(NUM_TYPE n, NUM_TYPE w) {
+string to_bin(const NUM_TYPE n, const NUM_TYPE w) {
     string ans;
     for (int i = 0; i <= w-1; i++) {
         if (n & (1 << i)) {
@@ -24,8 +24,7 @@ string to_bin(NUM_TYPE n, NUM_TYPE w) {
 template<typename T>
 void
 cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indices, typename vector<T>::size_type idx) {
-    int u = indices[idx];
-    for (int i = 0; i < u; i++) {
+    for (int i = 0; i < indices[idx]; i++) {
         frontier.push_back(i);
         if (idx == 0) {
             accum.push_back(frontier);
@@ -45,9 +44,9 @@ cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indice
 template<typename T>
 vector<vector<T>> cartesian_product(const vector<T> &indices) {
     vector<vector<T>> accum;
-    vector<T> frontier;
 
     if (!indices.empty()) {
+        vector<T> frontier;
         cartesian_recurse(accum, frontier, indices, indices.size() - 1);
     }
     return accum;
@@ -110,7 +109,7 @@ void Parser::parseCtrlWordDecl() {
             width = eat_num();
             bitset_tab[name] = make_pair(pos, pos + width - 1);
         } else {
-            macro_symtab[0][name] = init_macro_decl(pos, is_inverted);
+            macro_symtab[0][name] = init_macro_decl(1 << pos, is_inverted);
 
             if (is_inverted) {
                 default_value |= (1 << pos);
@@ -185,10 +184,9 @@ std::string Parser::eat_id() {
         string s = lexer.id();
         lexer.getToken();
         return s;
-    } else {
-        perr(format("Expected valid identifier."));
-        return "";
     }
+    perr(format("Expected valid identifier."));
+    return "";
 }
 
 void Parser::eat(Lexer::TokenType t) {
@@ -212,10 +210,8 @@ NUM_TYPE Parser::eat_num() {
         NUM_TYPE v = lexer.num();
         lexer.getToken();
         return v;
-    } else {
-        perr("Expected numeric literal.");
-        return 0;
     }
+    return perr("Expected numeric literal.");
 }
 
 void Parser::parseCode() {
@@ -332,7 +328,7 @@ context_expr Parser::parseContextExpr() {
     }
 }
 
-int Parser::perr(const std::string &msg) {
+int Parser::perr(const std::string &msg) const {
     err(lexer, msg, PARSE);
     return 0;
 }
@@ -345,7 +341,7 @@ statement Parser::parseStmt() {
             string name = eat_id();
 
             if (lexer == '=') {
-                if (bitset_tab.find(name) == bitset_tab.end()) {
+                if (!bitset_tab.contains(name)) {
                     perr(format("No bitset declaration found for {}", name));
                 }
 
@@ -472,18 +468,18 @@ void Parser::resolve() {
         max_ins = max(max_ins, inst);
     }
 
-    int clock_w = bit_width(max_n_is);
-    int max_clock_val = (1<<clock_w)-1;
+    counter_width = bit_width(max_n_is);
+    int max_clock_val = (1<<counter_width)-1;
 
-    ins_width = bit_width(max_ins) + clock_w;
+    ins_width = bit_width(max_ins) + counter_width;
 
     // shift all existing instructions max_n_is bits to the left
     // instead of a nested vector of subcommands, the index is encoded in the least significant max_n_is bits
     for (const auto &[ins, sub] : resolved) {
         for (int i = 0; i < max_clock_val; i++) {
-            output[(ins << clock_w) | i] = i < sub.size()?sub[i]:default_value;
+            output[(ins << counter_width) | i] = i < sub.size()?sub[i]:default_value;
 
-            cout << to_bin((ins << clock_w) | i, ins_width) << ": " << to_bin((i < sub.size()?sub[i]:default_value), ctrl_word_width) << '\n';
+            cout << to_bin((ins << counter_width) | i, ins_width) << ": " << to_bin((i < sub.size()?sub[i]:default_value), ctrl_word_width) << '\n';
         }
     }
 }
@@ -499,7 +495,7 @@ expansion_list Parser::resolve_expansion_list(const string &name) {
 }
 
 std::pair<int, int> Parser::resolve_bitset(const string &name) {
-    if (bitset_tab.find(name) != bitset_tab.end()) {
+    if (bitset_tab.contains(name)) {
         return bitset_tab[name];
     }
 

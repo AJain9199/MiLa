@@ -50,11 +50,12 @@ public:
     NUM_TYPE parseExpr(bool bit_def=false);
     context_expr parseContextExpr();
 
-    int perr(const std::string &msg);
+    int perr(const std::string &msg) const;
 
     void resolve();
     NUM_TYPE ctrl_word_width = 0;
     NUM_TYPE ins_width;
+    NUM_TYPE counter_width = 0;
     NUM_TYPE default_value = 0;
     std::map<NUM_TYPE, NUM_TYPE> output;
 
