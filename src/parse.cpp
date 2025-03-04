@@ -4,8 +4,7 @@
 #include <format>
 #include <stack>
 #include <bitset>
-
-#define perr(msg) err(msg, PARSE)
+#include <iostream>
 
 using namespace std;
 
@@ -65,6 +64,7 @@ void Parser::parseAssignmentDecl() {
     bool bit_def = false;
 
     if (lexer == ':') {
+        eat(':');
         bit_def = true;
     }
 
@@ -140,7 +140,7 @@ NUM_TYPE Parser::parseExpr(bool bit_def) {
     } else {
         perr("Unexpected lvalue for assignment.");
     }
-    return (bit_def ? 1 << val : val);
+    return (bit_def ? (1 << val) : val);
 }
 
 Parser::Parser(const std::string &filename) : lexer(filename) {
@@ -332,6 +332,11 @@ context_expr Parser::parseContextExpr() {
     }
 }
 
+int Parser::perr(const std::string &msg) {
+    err(lexer, msg, PARSE);
+    return 0;
+}
+
 statement Parser::parseStmt() {
     statement stmt;
     stmt.first = default_value;
@@ -446,8 +451,8 @@ NUM_TYPE Parser::resolve_statement(const statement &stmt, const vector<unsigned 
     return translation;
 }
 
-macro_decl Parser::init_macro_decl(NUM_TYPE pos, bool is_inverted) {
-    return {is_inverted?(~(1ull << pos)):(1ull << pos), is_inverted};
+macro_decl Parser::init_macro_decl(NUM_TYPE pos, const bool is_inverted) {
+    return {is_inverted?~pos:pos, is_inverted};
 }
 
 void Parser::macro_concat(unsigned long long &val, macro_decl m_decl) {

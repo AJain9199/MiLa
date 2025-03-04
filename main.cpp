@@ -5,13 +5,23 @@
 
 using namespace std;
 
-int main() {
-    Parser parse( "MOV.micro");
+int main(const int argc, char *argv[]) {
+    if (argc < 2) {
+        cout << "Usage: MiLa <file>.micro" << endl;
+        return 0;
+    }
+
+    Parser parse( argv[1]);
 
     parse.parseCode();
     parse.resolve();
 
-    v3HexAddressed("file.out", parse.ins_width, parse.ctrl_word_width, parse.output, parse.default_value);
+    string fname = "file.out";
+    if (argc > 2) {
+        fname = argv[2];
+    }
+
+    v3HexAddressed(fname, parse.ins_width, parse.ctrl_word_width, parse.output, parse.default_value);
 
     return 0;
 }

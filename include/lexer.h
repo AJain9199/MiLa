@@ -31,17 +31,26 @@ public:
     [[nodiscard]] enum Keyword key() const;
     [[nodiscard]] char punc() const;
     [[nodiscard]] enum TokenType current_token() const;
+    [[nodiscard]] int line() const;
+    [[nodiscard]] std::string filename() const;
 
-    bool operator==(char c);
-    bool operator==(Keyword k);
+
+    bool operator==(char c) const;
+    bool operator==(Keyword k) const;
 
 private:
     std::ifstream input_file_;
+    std::string filename_;
     std::string current_token_;
     char current_char_{};
+    int line_ = 1;
     void skipWs();
     TokenType token;
     Lexer *subfile{nullptr};
+
+    void lerr(const std::string &msg) const;
+
+    [[nodiscard]] std::string current_token_str() const;
 
     const std::map<std::string, enum Keyword> keywords = {{"CTRL", CTRL}};
     const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ':', ',', ';', '<', '>', '=', '.', '~'};

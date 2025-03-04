@@ -2,11 +2,11 @@
 #define MILA_ERROR_H
 
 #include <string>
-#include <iostream>
+#include <lexer.h>
 
 #define LEX 1
 #define PARSE 2
 
-void err(std::string msg, int code);
+void err(const Lexer &lex, const std::string &msg, int code);
 
 #endif // MILA_ERROR_H
