@@ -74,6 +74,14 @@ Lexer::TokenType Lexer::getToken() {
     }
 
     if (punctuation.contains(current_char_)) {
+        if (current_char_ == '#') {
+            while (current_char_ != '\n' && input_file_.good()) {
+                current_char_ = input_file_.get();
+            }
+
+            return getToken();
+        }
+
         return token = PUNCTUATION;
     }
 

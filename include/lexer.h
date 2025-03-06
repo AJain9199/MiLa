@@ -53,7 +53,7 @@ private:
     [[nodiscard]] std::string current_token_str() const;
 
     const std::map<std::string, enum Keyword> keywords = {{"CTRL", CTRL}};
-    const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ':', ',', ';', '<', '>', '=', '.', '~'};
+    const std::set<char> punctuation = {'(', ')', '{', '}', '[', ']', ':', ',', ';', '<', '>', '=', '.', '~', '#'};
 };
 
 #endif // MILA_LEXER_H

@@ -471,11 +471,6 @@ void Parser::resolve() {
     counter_width = bit_width(max_n_is-1);
     int max_clock_val = (1<<counter_width)-1;
 
-    if (counter_width > 0) {
-        perr("Cannot have multiple sub-instructions without clock.");
-        return;
-    }
-
     ins_width = bit_width(max_ins) + counter_width;
 
     // shift all existing instructions max_n_is bits to the left
