@@ -468,15 +468,20 @@ void Parser::resolve() {
         max_ins = max(max_ins, inst);
     }
 
-    counter_width = bit_width(max_n_is);
+    counter_width = bit_width(max_n_is-1);
     int max_clock_val = (1<<counter_width)-1;
+
+    if (counter_width > 0) {
+        perr("Cannot have multiple sub-instructions without clock.");
+        return;
+    }
 
     ins_width = bit_width(max_ins) + counter_width;
 
     // shift all existing instructions max_n_is bits to the left
     // instead of a nested vector of subcommands, the index is encoded in the least significant max_n_is bits
     for (const auto &[ins, sub] : resolved) {
-        for (int i = 0; i < max_clock_val; i++) {
+        for (int i = 0; i < max(max_clock_val, 1); i++) {
             output[(ins << counter_width) | i] = i < sub.size()?sub[i]:default_value;
 
             cout << to_bin((ins << counter_width) | i, ins_width) << ": " << to_bin((i < sub.size()?sub[i]:default_value), ctrl_word_width) << '\n';

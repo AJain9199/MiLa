@@ -54,7 +54,7 @@ public:
 
     void resolve();
     NUM_TYPE ctrl_word_width = 0;
-    NUM_TYPE ins_width;
+    NUM_TYPE ins_width{};
     NUM_TYPE counter_width = 0;
     NUM_TYPE default_value = 0;
     std::map<NUM_TYPE, NUM_TYPE> output;
