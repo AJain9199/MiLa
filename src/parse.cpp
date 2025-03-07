@@ -486,7 +486,7 @@ void Parser::resolve() {
 
 expansion_list Parser::resolve_expansion_list(const string &name) {
     for (int d = depth; d >= 0; d--) {
-        if (expansion_list_symtab[d].find(name) != expansion_list_symtab[d].end()) {
+        if (expansion_list_symtab[d].contains(name)) {
             return expansion_list_symtab[d].at(name);
         }
     }
