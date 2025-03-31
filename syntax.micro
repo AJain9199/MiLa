@@ -1,5 +1,0 @@
-CTRL {
-    RSI,
-    ALU : 3,
-    LOW
-}
