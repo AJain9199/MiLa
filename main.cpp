@@ -7,7 +7,7 @@ using namespace std;
 
 int main(const int argc, char *argv[]) {
     if (argc < 2) {
-        cout << "Usage: MiLa <file>.micro" << endl;
+        cout << "Usage: MiLa <input file>.micro <output file>.bin" << endl;
         return 0;
     }
 
