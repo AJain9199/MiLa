@@ -25,7 +25,11 @@ int main(const int argc, char *argv[]) {
         fname = argv[2];
     }
 
-    v3HexAddressed(fname, parse.ins_width, parse.ctrl_word_width, parse.output, parse.default_value);
+    if (argc > 3 && string(argv[3]) == "--raw") {
+        v2Raw(fname, parse.ctrl_word_width, parse.output, parse.default_value);
+    } else {
+        v3HexAddressed(fname, parse.ins_width, parse.ctrl_word_width, parse.output, parse.default_value);
+    }
 
     return 0;
 }

@@ -40,3 +40,22 @@ void v3HexAddressed(const std::string &fname, const NUM_TYPE key_w, const NUM_TY
         addr++;
     }
 }
+
+void v2Raw(const std::string &fname, const NUM_TYPE val_w, const map<NUM_TYPE, NUM_TYPE> &out, const NUM_TYPE default_val) {
+    std::ofstream file(fname, ios_base::out);
+    file << "v2.0 raw" << '\n';
+    NUM_TYPE addr = 0;
+
+    for (auto [key, val] : out) {
+        while (addr != key) {
+            outhex(file, val_w, default_val);
+            file << '\n';
+            addr++;
+        }
+
+        outhex(file, val_w, val);
+        file << '\n';
+
+        addr++;
+    }
+}

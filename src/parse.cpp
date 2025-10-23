@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <parse.h>
 #include <error.h>
 #include <string>
@@ -27,7 +28,9 @@ cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indice
     for (int i = 0; i < indices[idx]; i++) {
         frontier.push_back(i);
         if (idx == 0) {
-            accum.push_back(frontier);
+            vector<T> tmp;
+            reverse_copy(frontier.begin(), frontier.end(), tmp.begin());
+            accum.push_back(tmp);
         } else {
             cartesian_recurse(accum, frontier, indices, idx - 1);
         }
