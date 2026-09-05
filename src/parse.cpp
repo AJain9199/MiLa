@@ -28,7 +28,7 @@ cartesian_recurse(vector<vector<T>> &accum, vector<T> frontier, vector<T> indice
     for (int i = 0; i < indices[idx]; i++) {
         frontier.push_back(i);
         if (idx == 0) {
-            vector<T> tmp;
+            vector<T> tmp(frontier.size());
             reverse_copy(frontier.begin(), frontier.end(), tmp.begin());
             accum.push_back(tmp);
         } else {
@@ -467,7 +467,7 @@ void Parser::resolve() {
     // bit width of the maximum no. of instructions becomes the width of our clock counter
     unsigned long long max_n_is = 0, max_ins = 0;
     for (const auto &[inst, subi] : resolved) {
-        max_n_is = max(max_n_is, subi.size());
+        max_n_is = max(max_n_is, (unsigned long long) subi.size());
         max_ins = max(max_ins, inst);
     }
 
